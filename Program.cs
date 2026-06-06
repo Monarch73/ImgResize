@@ -54,6 +54,14 @@ static void ProcessImage(string inputFilePath, string baseInputDir, string baseO
             Directory.CreateDirectory(outputDirectory);
         }
 
+        const long MaxBytes = (long)(1.4 * 1024 * 1024); // 1.4 MB
+        if (new FileInfo(inputFilePath).Length < MaxBytes)
+        {
+            File.Copy(inputFilePath, outputFilePath, overwrite: true);
+            Console.WriteLine($"Skipped: {relativePath} (Already under 1.4MB, copied directly)");
+            return;
+        }
+
         using var image = Image.Load(inputFilePath);
 
         // 4 Megapixels = 4,000,000 pixels
@@ -70,7 +78,6 @@ static void ProcessImage(string inputFilePath, string baseInputDir, string baseO
         }
 
         // Compress until <= 1.4 MB
-        const long MaxBytes = (long)(1.4 * 1024 * 1024); // 1.4 MB
         int minQuality = 1;
         int maxQuality = 100;
         int bestQuality = 100;
